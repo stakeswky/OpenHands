@@ -1,8 +1,10 @@
 import base64
 import json
+import os
 import uuid
 import warnings
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Annotated, Literal, Optional
 from urllib.parse import quote
 from uuid import UUID as parse_uuid
@@ -92,6 +94,27 @@ def set_response_cookie(
         )
 
 
+@lru_cache(maxsize=1)
+def _get_base_domain() -> str | None:
+    """Extract base domain from WEB_HOST environment variable.
+
+    Assumes WEB_HOST is in the format: app.{BASE_DOMAIN}
+    Returns BASE_DOMAIN (everything after 'app.').
+
+    For example:
+    - app.all-hands.dev -> all-hands.dev
+    - localhost -> None
+    """
+    web_host = os.getenv('WEB_HOST', '').strip()
+    if not web_host or web_host == 'localhost':
+        return None
+
+    # WEB_HOST format is app.{BASE_DOMAIN}, extract BASE_DOMAIN
+    if web_host.startswith('app.'):
+        return web_host[4:]  # Remove 'app.' prefix
+    return None
+
+
 def get_cookie_domain(request: Request) -> str | None:
     # for now just use the full hostname except for staging stacks.
     return (
@@ -104,10 +127,14 @@ def get_cookie_domain(request: Request) -> str | None:
 
 def get_cookie_samesite(request: Request) -> Literal['lax', 'strict']:
     # for localhost and feature/staging stacks we set it to 'lax' as the cookie domain won't allow 'strict'
+    # Also use 'lax' for any subdomain of the base domain (derived from WEB_HOST)
+    base_domain = _get_base_domain()
+    hostname = request.url.hostname or ''
     return (
         'lax'
-        if request.url.hostname == 'localhost'
-        or (request.url.hostname or '').endswith('staging.all-hands.dev')
+        if hostname == 'localhost'
+        or hostname.endswith('staging.all-hands.dev')
+        or (base_domain and hostname.endswith(base_domain))
         else 'strict'
     )
 
