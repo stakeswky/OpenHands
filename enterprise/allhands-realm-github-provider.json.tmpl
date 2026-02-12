@@ -1780,8 +1780,8 @@
       "providerId": "oauth2",
       "enabled": true,
       "updateProfileFirstLoginMode": "on",
-      "trustEmail": false,
-      "storeToken": false,
+      "trustEmail": true,
+      "storeToken": true,
       "addReadTokenRoleOnCreate": false,
       "authenticateByDefault": false,
       "linkOnly": false,
@@ -1867,7 +1867,7 @@
     {
       "id": "c8f3a2d1-5e7b-4c9a-b6d8-1f2e3a4b5c6d",
       "name": "id-mapper",
-      "identityProviderAlias": "bitbucket-data-center",
+      "identityProviderAlias": "bitbucket_data_center",
       "identityProviderMapper": "oidc-user-attribute-idp-mapper",
       "config": {
         "syncMode": "FORCE",
@@ -1878,10 +1878,10 @@
     {
       "id": "d9e4b3c2-6f8c-5d0b-c7e9-2g3f4a5b6c7e",
       "name": "identity-provider",
-      "identityProviderAlias": "bitbucket-data-center",
+      "identityProviderAlias": "bitbucket_data_center",
       "identityProviderMapper": "hardcoded-attribute-idp-mapper",
       "config": {
-        "attribute.value": "bitbucket-data-center",
+        "attribute.value": "bitbucket_data_center",
         "syncMode": "FORCE",
         "attribute": "identity_provider"
       }
