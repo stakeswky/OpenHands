@@ -429,13 +429,16 @@ async def keycloak_callback(
     )
 
     if not valid_offline_token:
+        # Use the original state if provided, otherwise default to base_url
+        # This prevents Python None from becoming the literal string "None" in the URL
+        offline_state = state if state else str(request.base_url)
         redirect_url = (
             f'{KEYCLOAK_SERVER_URL_EXT}/realms/{KEYCLOAK_REALM_NAME}/protocol/openid-connect/auth'
             f'?client_id={KEYCLOAK_CLIENT_ID}&response_type=code'
             f'&kc_idp_hint={idp}'
             f'&redirect_uri={scheme}%3A%2F%2F{request.url.netloc}%2Foauth%2Fkeycloak%2Foffline%2Fcallback'
             f'&scope=openid%20email%20profile%20offline_access'
-            f'&state={state}'
+            f'&state={offline_state}'
         )
 
     has_accepted_tos = user.accepted_tos is not None
