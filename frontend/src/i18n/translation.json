@@ -9775,6 +9775,22 @@
     "tr": "Bitbucket'a bağlan",
     "uk": "Увійти за допомогою Bitbucket"
   },
+  "BITBUCKET_DATA_CENTER$CONNECT_TO_BITBUCKET_DATA_CENTER": {
+    "en": "Log in with Bitbucket Data Center",
+    "ja": "Bitbucket Data Centerに接続",
+    "zh-CN": "连接到Bitbucket Data Center",
+    "zh-TW": "連接到Bitbucket Data Center",
+    "ko-KR": "Bitbucket Data Center에 연결",
+    "de": "Mit Bitbucket Data Center verbinden",
+    "no": "Koble til Bitbucket Data Center",
+    "it": "Connetti a Bitbucket Data Center",
+    "pt": "Conectar ao Bitbucket Data Center",
+    "es": "Conectar a Bitbucket Data Center",
+    "ar": "الاتصال بـ Bitbucket Data Center",
+    "fr": "Se connecter à Bitbucket Data Center",
+    "tr": "Bitbucket Data Center'a bağlan",
+    "uk": "Увійти за допомогою Bitbucket Data Center"
+  },
   "ENTERPRISE_SSO$CONNECT_TO_ENTERPRISE_SSO": {
     "en": "Login with Enterprise SSO",
     "ja": "エンタープライズSSOでログイン",

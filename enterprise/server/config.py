@@ -162,11 +162,11 @@ class SaaSServerConfig(ServerConfig):
         if BITBUCKET_APP_CLIENT_ID:
             providers_configured.append(ProviderType.BITBUCKET)
 
-        if ENABLE_ENTERPRISE_SSO:
-            providers_configured.append(ProviderType.ENTERPRISE_SSO)
-
         if ENABLE_BITBUCKET_DATA_CENTER:
             providers_configured.append(ProviderType.BITBUCKET_DATA_CENTER)
+
+        if ENABLE_ENTERPRISE_SSO:
+            providers_configured.append(ProviderType.ENTERPRISE_SSO)
 
         config: dict[str, typing.Any] = {
             'APP_MODE': self.app_mode,

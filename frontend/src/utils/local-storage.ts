@@ -8,9 +8,9 @@ export enum LoginMethod {
   GITHUB = "github",
   GITLAB = "gitlab",
   BITBUCKET = "bitbucket",
+  BITBUCKET_DATA_CENTER = "bitbucket_data_center",
   AZURE_DEVOPS = "azure_devops",
   ENTERPRISE_SSO = "enterprise_sso",
-  BITBUCKET_DATA_CENTER = "bitbucket_data_center",
 }
 
 /**
