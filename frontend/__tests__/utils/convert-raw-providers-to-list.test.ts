@@ -24,4 +24,21 @@ describe("convertRawProvidersToList", () => {
     expect(convertRawProvidersToList(example3)).toEqual(["gitlab"]);
     expect(convertRawProvidersToList(example4)).toEqual(["azure_devops"]);
   });
+
+  it("should exclude auth-only providers from the list", () => {
+    const bdcOnly: Partial<Record<Provider, string | null>> = {
+      bitbucket_data_center: "some-host",
+    };
+    const bdcWithGitHub: Partial<Record<Provider, string | null>> = {
+      github: "some-token",
+      bitbucket_data_center: "some-host",
+    };
+    const ssoOnly: Partial<Record<Provider, string | null>> = {
+      enterprise_sso: null,
+    };
+
+    expect(convertRawProvidersToList(bdcOnly)).toEqual([]);
+    expect(convertRawProvidersToList(bdcWithGitHub)).toEqual(["github"]);
+    expect(convertRawProvidersToList(ssoOnly)).toEqual([]);
+  });
 });
