@@ -78,18 +78,9 @@ Learn more at [openhands.dev/enterprise](https://openhands.dev/enterprise)
 Check out our [Product Roadmap](https://github.com/orgs/openhands/projects/1), and feel free to
 [open up an issue](https://github.com/OpenHands/OpenHands/issues) if there's something you'd like to see!
 
-```bash
-docker pull docker.openhands.dev/openhands/runtime:0.62-nikolaik
+You might also be interested in our [evaluation infrastructure](https://github.com/OpenHands/benchmarks), our [chrome extension](https://github.com/OpenHands/openhands-chrome-extension/), or our [Theory-of-Mind module](https://github.com/OpenHands/ToM-SWE).
 
-docker run -it --rm --pull=always \
-    -e SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.openhands.dev/openhands/runtime:0.62-nikolaik \
-    -e LOG_ALL_EVENTS=true \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v ~/.openhands:/.openhands \
-    -p 3000:3000 \
-    --add-host host.docker.internal:host-gateway \
-    --name openhands-app \
-    docker.openhands.dev/openhands/openhands:0.62
-```
+All our work is available under the MIT license, except for the `enterprise/` directory in this repository (see the [enterprise license](enterprise/LICENSE) for details).
+The core `openhands` and `agent-server` Docker images are fully MIT-licensed as well.
 
 If you need help with anything, or just want to chat, [come find us on Slack](https://dub.sh/openhands).
