@@ -3,7 +3,11 @@ from urllib.parse import urlparse
 from openhands.integrations.bitbucket_data_center.service.base import (
     BitbucketDCMixinBase,
 )
-from openhands.integrations.service_types import Repository, SuggestedTask
+from openhands.integrations.service_types import (
+    AuthenticationError,
+    Repository,
+    SuggestedTask,
+)
 from openhands.server.types import AppMode
 
 
@@ -63,8 +67,7 @@ class BitbucketDCReposMixin(BitbucketDCMixinBase):
         link_header = ''
         if has_next:
             next_start = response.get('nextPageStart', start + per_page)
-            next_page = (next_start // per_page) + 1
-            link_header = f'<{url}?page={next_page}>; rel="next"'
+            link_header = f'<{url}?start={next_start}&limit={per_page}>; rel="next"'
 
         return [
             self._parse_repository(repo, link_header=link_header) for repo in repos
@@ -164,8 +167,10 @@ class BitbucketDCReposMixin(BitbucketDCMixinBase):
         params = {'name': query, 'limit': per_page}
         try:
             response, _ = await self._make_request(url, params)
-            for repo in response.get('values', []):
-                repositories.append(self._parse_repository(repo))
+            for repo_data in response.get('values', []):
+                repositories.append(self._parse_repository(repo_data))
+        except AuthenticationError:
+            raise
         except Exception:
             # Fallback: search project keys and repos under matching projects
             all_projects = await self.get_installations()

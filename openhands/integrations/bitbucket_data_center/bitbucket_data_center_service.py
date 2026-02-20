@@ -54,8 +54,7 @@ class BitbucketDataCenterService(
         self.base_domain = domain
         self.BASE_URL = f'https://{domain}/rest/api/1.0' if domain else ''
 
-        if token:
-            self.token = token
+        self.token = token or SecretStr('')
 
     @property
     def provider(self) -> str:

@@ -25,6 +25,7 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
     """
 
     BASE_URL: str = ''  # Set dynamically from domain in __init__
+    user_id: str | None = None
 
     def _extract_owner_and_repo(self, repository: str) -> tuple[str, str]:
         """Extract project key and repo slug from repository string.
@@ -46,9 +47,6 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
     async def get_latest_token(self) -> SecretStr | None:
         """Get latest working token of the user."""
         return self.token
-
-    def _has_token_expired(self, status_code: int) -> bool:
-        return status_code == 401
 
     async def _get_headers(self) -> dict[str, str]:
         """Get headers for Bitbucket Data Center API requests."""
@@ -126,9 +124,19 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
 
     async def get_user(self) -> User:
         """Get the authenticated user's information."""
-        url = f'{self.BASE_URL}/users?filter={self.user_id}'
+        if not self.user_id:
+            # PAT-only auth with no username — return a minimal user object.
+            return User(
+                id='',
+                login='',
+                avatar_url='',
+                name=None,
+                email=None,
+            )
+
+        url = f'{self.BASE_URL}/users'
         try:
-            data, _ = await self._make_request(url)
+            data, _ = await self._make_request(url, {'filter': self.user_id})
             users = data.get('values', [])
             if users:
                 user = users[0]
@@ -147,8 +155,8 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
 
         # Return minimal user if lookup fails
         return User(
-            id=self.user_id or '',
-            login=self.user_id or '',
+            id=self.user_id,
+            login=self.user_id,
             avatar_url='',
             name=None,
             email=None,
@@ -160,24 +168,27 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
         """Parse a Bitbucket Data Center API repository response into a Repository object."""
         project_key = repo.get('project', {}).get('key', '')
         repo_slug = repo.get('slug', '')
-        full_name = (
-            f'{project_key}/{repo_slug}' if project_key and repo_slug else ''
-        )
 
+        if not project_key or not repo_slug:
+            raise ValueError(
+                f'Cannot parse repository: missing project key or slug. '
+                f'Got project_key={project_key!r}, repo_slug={repo_slug!r}'
+            )
+
+        full_name = f'{project_key}/{repo_slug}'
         is_public = repo.get('public', False)
-        owner_type = OwnerType.ORGANIZATION
 
-        default_branch = repo.get('defaultBranch', {})
-        main_branch = default_branch.get('displayId') if default_branch else None
+        # defaultBranch is a plain string in the DC REST API schema
+        main_branch: str | None = repo.get('defaultBranch') or None
 
         return Repository(
             id=str(repo.get('id', '')),
-            full_name=full_name,  # type: ignore[arg-type]
+            full_name=full_name,
             git_provider=ProviderType.BITBUCKET_DATA_CENTER,
             is_public=is_public,
             stargazers_count=None,
             pushed_at=None,
-            owner_type=owner_type,
+            owner_type=OwnerType.ORGANIZATION,
             link_header=link_header,
             main_branch=main_branch,
         )
@@ -199,7 +210,11 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
         return self._parse_repository(data)
 
     async def _get_cursorrules_url(self, repository: str) -> str:
-        """Get the URL for fetching .cursorrules file."""
+        """Get the URL for fetching .cursorrules file.
+
+        Uses the /browse/ endpoint (returns JSON) rather than /raw/ (returns
+        plain text), because _make_request always calls response.json().
+        """
         repo_details = await self.get_repository_details_from_repo_name(repository)
         if not repo_details.main_branch:
             raise ResourceNotFoundError(
@@ -208,7 +223,7 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
             )
         project, repo_slug = self._extract_owner_and_repo(repository)
         return (
-            f'{self.BASE_URL}/projects/{project}/repos/{repo_slug}/raw/.cursorrules'
+            f'{self.BASE_URL}/projects/{project}/repos/{repo_slug}/browse/.cursorrules'
             f'?at=refs/heads/{repo_details.main_branch}'
         )
 
@@ -248,3 +263,49 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
     def _get_file_path_from_item(self, item: dict, microagents_path: str) -> str:
         """Extract file path from directory item."""
         return item.get('path', {}).get('toString', '')
+
+    async def _process_microagents_directory(
+        self, repository: str, microagents_path: str
+    ) -> list:
+        """Override for Bitbucket DC browse endpoint directory structure.
+
+        The DC browse endpoint returns directory contents nested under
+        response['children']['values'], not at the top-level response['values']
+        that the base implementation expects.
+        """
+        from openhands.microagent.types import MicroagentResponse
+
+        microagents: list[MicroagentResponse] = []
+
+        try:
+            directory_url = await self._get_microagents_directory_url(
+                repository, microagents_path
+            )
+            response, _ = await self._make_request(directory_url, None)
+
+            # DC browse for a directory: {"children": {"values": [...], ...}, ...}
+            children = response.get('children', {})
+            items = children.get('values', [])
+
+            for item in items:
+                if self._is_valid_microagent_file(item):
+                    try:
+                        file_name = self._get_file_name_from_item(item)
+                        file_path = self._get_file_path_from_item(
+                            item, microagents_path
+                        )
+                        microagents.append(
+                            self._create_microagent_response(file_name, file_path)
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            f'Error processing microagent {item.get("path", {}).get("name", "unknown")}: {e}'
+                        )
+        except ResourceNotFoundError:
+            logger.info(
+                f'No microagents directory found in {repository} at {microagents_path}'
+            )
+        except Exception as e:
+            logger.warning(f'Error fetching microagents directory: {e}')
+
+        return microagents

@@ -79,6 +79,16 @@ class SuggestedTask(BaseModel):
                 'ciProvider': 'Bitbucket',
                 'requestVerb': 'pull request',
             }
+        elif self.git_provider == ProviderType.BITBUCKET_DATA_CENTER:
+            return {
+                'requestType': 'Pull Request',
+                'requestTypeShort': 'PR',
+                'apiName': 'Bitbucket Data Center API',
+                'tokenEnvVar': 'BITBUCKET_DATA_CENTER_TOKEN',
+                'ciSystem': 'Bitbucket Pipelines',
+                'ciProvider': 'Bitbucket Data Center',
+                'requestVerb': 'pull request',
+            }
 
         raise ValueError(f'Provider {self.git_provider} for suggested task prompts')
 

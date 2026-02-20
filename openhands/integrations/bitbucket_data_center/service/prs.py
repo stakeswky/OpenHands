@@ -41,6 +41,10 @@ class BitbucketDCPRsMixin(BitbucketDCMixinBase):
         payload = {
             'title': title,
             'description': body or '',
+            'state': 'OPEN',
+            'open': True,
+            'closed': False,
+            'draft': draft,
             'fromRef': {
                 'id': f'refs/heads/{source_branch}',
                 'repository': repo_ref,
