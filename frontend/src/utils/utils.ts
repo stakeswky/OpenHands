@@ -194,6 +194,7 @@ export const shouldUseInstallationRepos = (
 
   switch (provider) {
     case "bitbucket":
+    case "bitbucket_data_center":
       return true;
     case "gitlab":
       return false;

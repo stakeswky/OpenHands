@@ -10399,6 +10399,15 @@
     "de": "klicken Sie hier für Anweisungen",
     "uk": "натисніть тут, щоб отримати інструкції"
   },
+  "BITBUCKET_DATA_CENTER$TOKEN_LABEL": {
+    "en": "Bitbucket Data Center Token"
+  },
+  "BITBUCKET_DATA_CENTER$HOST_LABEL": {
+    "en": "Bitbucket Data Center Host"
+  },
+  "BITBUCKET_DATA_CENTER$TOKEN_HELP_TEXT": {
+    "en": "Create an <0>HTTP access token</0> in your Bitbucket Data Center instance with repository read/write and pull request read/write permissions."
+  },
   "GITLAB$OR_SEE": {
     "en": "or see the",
     "ja": "または参照",
@@ -11694,6 +11703,9 @@
     "tr": "Bitbucket token daha fazla görme bağlantısı",
     "de": "Bitbucket-Token mehr sehen Link",
     "uk": "Посилання для перегляду більше про токен Bitbucket"
+  },
+  "GIT$BITBUCKET_DC_TOKEN_HELP_LINK": {
+    "en": "Bitbucket Data Center HTTP access token docs"
   },
   "GIT$GITHUB_TOKEN_HELP_LINK": {
     "en": "GitHub token help link",

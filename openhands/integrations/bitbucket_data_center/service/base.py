@@ -122,6 +122,14 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
 
         return all_items[:max_items]
 
+    async def verify_access(self) -> None:
+        """Verify that the token and host are valid by making a lightweight API call.
+
+        Raises an exception if the token is invalid or the host is unreachable.
+        """
+        url = f'{self.BASE_URL}/repos'
+        await self._make_request(url, {'limit': '1'})
+
     async def get_user(self) -> User:
         """Get the authenticated user's information."""
         if not self.user_id:

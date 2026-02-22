@@ -226,6 +226,18 @@ class ProviderHandler:
 
         return []
 
+    async def get_bitbucket_dc_projects(self) -> list[str]:
+        service = cast(
+            InstallationsService,
+            self.get_service(ProviderType.BITBUCKET_DATA_CENTER),
+        )
+        try:
+            return await service.get_installations()
+        except Exception as e:
+            logger.warning(f'Failed to get bitbucket data center projects {e}')
+
+        return []
+
     async def get_azure_devops_organizations(self) -> list[str]:
         service = cast(
             InstallationsService, self.get_service(ProviderType.AZURE_DEVOPS)
@@ -732,6 +744,7 @@ class ProviderHandler:
                         remote_url = f'{protocol}://x-token-auth:{token_value}@{domain}/{repo_name}.git'
                 elif provider == ProviderType.BITBUCKET_DATA_CENTER:
                     # Server clone URL: https://host/scm/{project_lower}/{repo}.git
+                    # DC uses HTTP Basic auth — PAT as password with any non-empty username
                     project, repo_slug = (
                         repo_name.split('/', 1)
                         if '/' in repo_name
@@ -739,9 +752,11 @@ class ProviderHandler:
                     )
                     scm_path = f'scm/{project.lower()}/{repo_slug}.git'
                     if ':' in token_value:
+                        # username:password format
                         remote_url = f'{protocol}://{token_value}@{domain}/{scm_path}'
                     else:
-                        remote_url = f'{protocol}://x-token-auth:{token_value}@{domain}/{scm_path}'
+                        # HTTP Access Token (PAT) — use as password in Basic auth
+                        remote_url = f'{protocol}://jlaverty:{token_value}@{domain}/{scm_path}'
                 elif provider == ProviderType.AZURE_DEVOPS:
                     # Azure DevOps uses PAT with Basic auth
                     # Format: https://{anything}:{PAT}@dev.azure.com/{org}/{project}/_git/{repo}
