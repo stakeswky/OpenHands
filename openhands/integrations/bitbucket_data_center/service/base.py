@@ -289,31 +289,38 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
             directory_url = await self._get_microagents_directory_url(
                 repository, microagents_path
             )
-            response, _ = await self._make_request(directory_url, None)
 
-            # DC browse for a directory: {"children": {"values": [...], ...}, ...}
-            children = response.get('children', {})
-            items = children.get('values', [])
+            # DC browse paginates via isLastPage / nextPageStart
+            start = 0
+            while True:
+                params = {'start': start} if start > 0 else None
+                response, _ = await self._make_request(directory_url, params)
 
-            for item in items:
-                if self._is_valid_microagent_file(item):
-                    try:
-                        file_name = self._get_file_name_from_item(item)
-                        file_path = self._get_file_path_from_item(
-                            item, microagents_path
-                        )
-                        microagents.append(
-                            self._create_microagent_response(file_name, file_path)
-                        )
-                    except Exception as e:
-                        logger.warning(
-                            f'Error processing microagent {item.get("path", {}).get("name", "unknown")}: {e}'
-                        )
+                # DC browse for a directory: {"children": {"values": [...], ...}, ...}
+                children = response.get('children', {})
+                items = children.get('values', [])
+
+                for item in items:
+                    if self._is_valid_microagent_file(item):
+                        try:
+                            file_name = self._get_file_name_from_item(item)
+                            file_path = self._get_file_path_from_item(
+                                item, microagents_path
+                            )
+                            microagents.append(
+                                self._create_microagent_response(file_name, file_path)
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f'Error processing microagent {item.get("path", {}).get("name", "unknown")}: {e}'
+                            )
+
+                if children.get('isLastPage', True):
+                    break
+                start = children.get('nextPageStart', start + 25)
         except ResourceNotFoundError:
             logger.info(
                 f'No microagents directory found in {repository} at {microagents_path}'
             )
-        except Exception as e:
-            logger.warning(f'Error fetching microagents directory: {e}')
 
         return microagents

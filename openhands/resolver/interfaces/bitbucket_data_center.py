@@ -111,6 +111,10 @@ class BitbucketDataCenterPRHandler(IssueHandlerInterface):
             data = response.json()
             return data.get('displayId', 'main')
         except Exception:
+            logger.warning(
+                f'Failed to get default branch for {self.owner}/{self.repo}, falling back to "main"',
+                exc_info=True,
+            )
             return 'main'
 
     def get_branch_name(self, base_branch_name: str) -> str:
@@ -129,6 +133,10 @@ class BitbucketDataCenterPRHandler(IssueHandlerInterface):
                 for b in data.get('values', [])
             )
         except Exception:
+            logger.warning(
+                f'Failed to check branch existence for {branch_name!r} in {self.owner}/{self.repo}',
+                exc_info=True,
+            )
             return False
 
     async def get_issue(self, issue_number: int) -> Issue:

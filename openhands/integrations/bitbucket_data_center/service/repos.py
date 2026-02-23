@@ -6,7 +6,9 @@ from openhands.integrations.bitbucket_data_center.service.base import (
 from openhands.integrations.service_types import (
     AuthenticationError,
     Repository,
+    ResourceNotFoundError,
     SuggestedTask,
+    UnknownException,
 )
 from openhands.server.types import AppMode
 
@@ -171,7 +173,7 @@ class BitbucketDCReposMixin(BitbucketDCMixinBase):
                 repositories.append(self._parse_repository(repo_data))
         except AuthenticationError:
             raise
-        except Exception:
+        except (ResourceNotFoundError, UnknownException):
             # Fallback: search project keys and repos under matching projects
             all_projects = await self.get_installations()
             matching_projects = [p for p in all_projects if query.upper() in p]

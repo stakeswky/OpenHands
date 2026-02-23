@@ -64,6 +64,10 @@ class BitbucketDCPRsMixin(BitbucketDCMixinBase):
         links = data.get('links', {}).get('self', [])
         if links:
             return links[0].get('href', '')
+        logger.debug(
+            f'PR created in {repo_name} but API response contained no self link. '
+            f'Response keys: {list(data.keys())}'
+        )
         return ''
 
     async def get_pr_details(self, repository: str, pr_number: int) -> dict:
@@ -90,22 +94,18 @@ class BitbucketDCPRsMixin(BitbucketDCMixinBase):
 
         Returns:
             True if PR is OPEN, False if merged/declined/superseded
+
+        Raises:
+            ResourceNotFoundError: If the PR does not exist (404)
+            AuthenticationError: If the token is invalid
         """
-        try:
-            pr_details = await self.get_pr_details(repository, pr_number)
+        pr_details = await self.get_pr_details(repository, pr_number)
 
-            if 'state' in pr_details:
-                return pr_details['state'] == 'OPEN'
+        if 'state' in pr_details:
+            return pr_details['state'] == 'OPEN'
 
-            logger.warning(
-                f'Could not determine Bitbucket DC PR status for {repository}#{pr_number}. '
-                f'Response keys: {list(pr_details.keys())}. Assuming PR is active.'
-            )
-            return True
-
-        except Exception as e:
-            logger.warning(
-                f'Could not determine Bitbucket DC PR status for {repository}#{pr_number}: {e}. '
-                f'Including conversation to be safe.'
-            )
-            return True
+        logger.warning(
+            f'Could not determine Bitbucket DC PR status for {repository}#{pr_number}. '
+            f'Response keys: {list(pr_details.keys())}. Assuming PR is active.'
+        )
+        return True
