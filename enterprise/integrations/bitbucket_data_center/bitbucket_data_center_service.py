@@ -41,6 +41,7 @@ class SaaSBitbucketDataCenterService(BitbucketDataCenterService):
             external_token_manager=external_token_manager,
             base_domain=base_domain,
         )
+        self.refresh = True
 
         self.external_auth_token = external_auth_token
         self.external_auth_id = external_auth_id
@@ -81,4 +82,6 @@ class SaaSBitbucketDataCenterService(BitbucketDataCenterService):
             )
         else:
             logger.warning('external_auth_token and user_id not set!')
+        if bitbucket_dc_token:
+            self.token = bitbucket_dc_token
         return bitbucket_dc_token

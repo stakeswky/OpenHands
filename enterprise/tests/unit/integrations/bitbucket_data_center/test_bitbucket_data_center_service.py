@@ -122,3 +122,34 @@ class TestSaaSBitbucketDataCenterServiceGetLatestToken:
         )
         result = await service.get_latest_token()
         assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_latest_token_updates_self_token(self):
+        """get_latest_token() persists the new token to self.token for retry use."""
+        service = SaaSBitbucketDataCenterService(
+            external_auth_token=SecretStr('access-token-value'),
+            base_domain='bitbucket.example.com',
+        )
+        with patch.object(
+            service.token_manager,
+            'get_idp_token',
+            new_callable=AsyncMock,
+            return_value='refreshed-dc-token',
+        ):
+            result = await service.get_latest_token()
+
+        assert result is not None
+        assert result.get_secret_value() == 'refreshed-dc-token'
+        assert service.token is not None
+        assert service.token.get_secret_value() == 'refreshed-dc-token'
+
+
+class TestSaaSBitbucketDataCenterServiceRefresh:
+    """Tests for refresh flag behaviour."""
+
+    def test_refresh_is_true_by_default(self):
+        """self.refresh must be True so the 401-retry path in _make_request is enabled."""
+        service = SaaSBitbucketDataCenterService(
+            base_domain='bitbucket.example.com',
+        )
+        assert service.refresh is True
