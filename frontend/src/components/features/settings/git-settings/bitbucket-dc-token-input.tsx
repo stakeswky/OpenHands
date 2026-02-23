@@ -33,7 +33,9 @@ export function BitbucketDCTokenInput({
         label={t(I18nKey.BITBUCKET_DATA_CENTER$TOKEN_LABEL)}
         type="password"
         className="w-full max-w-[680px]"
-        placeholder={isBitbucketDCTokenSet ? "<hidden>" : "your-http-access-token"}
+        placeholder={
+          isBitbucketDCTokenSet ? "<hidden>" : "x-token-auth:your-token"
+        }
         startContent={
           isBitbucketDCTokenSet && (
             <KeyStatusIcon

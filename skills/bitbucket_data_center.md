@@ -9,7 +9,7 @@ triggers:
 ---
 
 You have access to an environment variable, `BITBUCKET_DATA_CENTER_TOKEN`, which contains
-a basic auth token (`username:app_password`) that allows you to interact with Bitbucket Data Center's REST API.
+a basic auth token in the format `x-token-auth:your-token` that allows you to interact with Bitbucket Data Center's REST API.
 
 <IMPORTANT>
 You can use `curl` with the `BITBUCKET_DATA_CENTER_TOKEN` to interact with Bitbucket Data Center's REST API.
