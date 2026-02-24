@@ -20,6 +20,9 @@ from server.auth.auth_error import ExpiredError
 from server.auth.constants import (
     BITBUCKET_APP_CLIENT_ID,
     BITBUCKET_APP_CLIENT_SECRET,
+    BITBUCKET_DATA_CENTER_CLIENT_ID,
+    BITBUCKET_DATA_CENTER_CLIENT_SECRET,
+    BITBUCKET_DATA_CENTER_TOKEN_URL,
     DUPLICATE_EMAIL_CHECK,
     GITHUB_APP_CLIENT_ID,
     GITHUB_APP_CLIENT_SECRET,
@@ -354,6 +357,8 @@ class TokenManager:
             return await self._refresh_gitlab_token(refresh_token)
         elif idp == ProviderType.BITBUCKET:
             return await self._refresh_bitbucket_token(refresh_token)
+        elif idp == ProviderType.BITBUCKET_DATA_CENTER:
+            return await self._refresh_bitbucket_data_center_token(refresh_token)
         else:
             raise ValueError(f'Unsupported IDP: {idp}')
 
@@ -431,6 +436,31 @@ class TokenManager:
             response = await client.post(url, data=data, headers=headers)
             response.raise_for_status()
             logger.info('Successfully refreshed Bitbucket token')
+
+            data = response.json()
+            return await self._parse_refresh_response(data)
+
+    async def _refresh_bitbucket_data_center_token(
+        self, refresh_token: str
+    ) -> dict[str, str | int]:
+        url = BITBUCKET_DATA_CENTER_TOKEN_URL
+        logger.info(f'Refreshing Bitbucket Data Center token with URL: {url}')
+
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+
+        data = {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+            'client_id': BITBUCKET_DATA_CENTER_CLIENT_ID,
+            'client_secret': BITBUCKET_DATA_CENTER_CLIENT_SECRET,
+        }
+
+        async with httpx.AsyncClient(verify=httpx_verify_option()) as client:
+            response = await client.post(url, data=data, headers=headers)
+            response.raise_for_status()
+            logger.info('Successfully refreshed Bitbucket Data Center token')
 
             data = response.json()
             return await self._parse_refresh_response(data)
