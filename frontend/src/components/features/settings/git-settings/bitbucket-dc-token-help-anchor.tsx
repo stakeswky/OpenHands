@@ -5,7 +5,10 @@ export function BitbucketDCTokenHelpAnchor() {
   const { t } = useTranslation();
 
   return (
-    <p data-testid="bitbucket-dc-token-help-anchor" className="text-xs">
+    <p
+      data-testid="bitbucket-dc-token-help-anchor"
+      className="text-xs max-w-[680px]"
+    >
       <Trans
         i18nKey={I18nKey.BITBUCKET_DATA_CENTER$TOKEN_HELP_TEXT}
         components={[
