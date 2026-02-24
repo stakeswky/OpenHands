@@ -129,7 +129,7 @@ class BitbucketDCMixinBase(BaseGitService, HTTPClient):
     async def get_user(self) -> User:
         """Get the authenticated user's information."""
         if not self.user_id:
-            # x-token-auth PAT or no token — no username available for lookup.
+            # x-token-auth or no token — no username available for lookup.
             return User(
                 id='',
                 login='',

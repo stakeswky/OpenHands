@@ -18,7 +18,7 @@ class BitbucketDataCenterPRHandler(IssueHandlerInterface):
     Uses Bitbucket Server REST API 1.0:
       https://{base_domain}/rest/api/1.0/projects/{owner}/repos/{repo}/...
 
-    Authentication: Basic auth — token must be in username:password format.
+    Authentication: Bearer auth
     """
 
     def __init__(
@@ -47,9 +47,8 @@ class BitbucketDataCenterPRHandler(IssueHandlerInterface):
         self.owner = owner
 
     def get_headers(self) -> dict[str, str]:
-        auth_str = base64.b64encode(self.token.encode()).decode()
         return {
-            'Authorization': f'Basic {auth_str}',
+            'Authorization': f'Bearer {self.token}',
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
