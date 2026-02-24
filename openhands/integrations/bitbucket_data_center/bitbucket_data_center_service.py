@@ -7,8 +7,10 @@ from openhands.integrations.bitbucket_data_center.service import (
     BitbucketDCFeaturesMixin,
     BitbucketDCPRsMixin,
     BitbucketDCReposMixin,
+    BitbucketDCResolverMixin,
 )
 from openhands.integrations.service_types import (
+    BaseGitService,
     GitService,
     InstallationsService,
     ProviderType,
@@ -17,10 +19,12 @@ from openhands.utils.import_utils import get_impl
 
 
 class BitbucketDataCenterService(
-    BitbucketDCReposMixin,
     BitbucketDCBranchesMixin,
-    BitbucketDCPRsMixin,
     BitbucketDCFeaturesMixin,
+    BitbucketDCPRsMixin,
+    BitbucketDCReposMixin,
+    BitbucketDCResolverMixin,
+    BaseGitService,
     GitService,
     InstallationsService,
 ):
@@ -54,7 +58,8 @@ class BitbucketDataCenterService(
         self.base_domain = domain
         self.BASE_URL = f'https://{domain}/rest/api/1.0' if domain else ''
 
-        self.token = token or SecretStr('')
+        if token:
+            self.token = token
 
     @property
     def provider(self) -> str:
