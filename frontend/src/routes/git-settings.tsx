@@ -66,7 +66,8 @@ function GitSettingsScreen() {
   const existingGithubHost = settings?.provider_tokens_set.github;
   const existingGitlabHost = settings?.provider_tokens_set.gitlab;
   const existingBitbucketHost = settings?.provider_tokens_set.bitbucket;
-  const existingBitbucketDCHost = settings?.provider_tokens_set.bitbucket_data_center;
+  const existingBitbucketDCHost =
+    settings?.provider_tokens_set.bitbucket_data_center;
   const existingAzureDevOpsHost = settings?.provider_tokens_set.azure_devops;
   const existingForgejoHost = settings?.provider_tokens_set.forgejo;
 
