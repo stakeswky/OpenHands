@@ -9,20 +9,18 @@ triggers:
 ---
 
 You have access to an environment variable, `BITBUCKET_DATA_CENTER_TOKEN`, which contains
-a basic auth token in the format `x-token-auth:your-token` that allows you to interact with Bitbucket Data Center's REST API.
+an auth token in the format `username:your-token` that allows you to interact with the git repository.
+
+You can also use this token to interact with Bitbucket Data Center's REST API,
+but you must strip the username from the token and use it as a bearer token in the `Authorization` header. For example:
+```bash
+curl -H "Authorization Bearer $(echo $BITBUCKET_DATA_CENTER_TOKEN | cut -d: -f2)" https://{domain}/rest/api/1.0/...
+```
 
 <IMPORTANT>
-You can use `curl` with the `BITBUCKET_DATA_CENTER_TOKEN` to interact with Bitbucket Data Center's REST API.
-The API base URL is `https://{domain}/rest/api/1.0`.
 ALWAYS use the Bitbucket Data Center API for operations instead of a web browser.
 ALWAYS use the `create_bitbucket_data_center_pr` tool to open a pull request
 </IMPORTANT>
-
-To authenticate API requests use Basic auth:
-```bash
-curl -u $BITBUCKET_DATA_CENTER_TOKEN https://{domain}/rest/api/1.0/...
-```
-
 
 If you encounter authentication issues when pushing to Bitbucket Data Center (such as password prompts or permission errors), the old token may have expired. In such case, update the remote URL to include the current token: `git remote set-url origin https://${BITBUCKET_DATA_CENTER_TOKEN}@{domain}/scm/{project_lower}/{repo}.git`
 
