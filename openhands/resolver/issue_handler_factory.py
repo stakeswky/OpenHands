@@ -5,6 +5,9 @@ from openhands.resolver.interfaces.bitbucket import (
     BitbucketIssueHandler,
     BitbucketPRHandler,
 )
+from openhands.resolver.interfaces.bitbucket_data_center import (
+    BitbucketDataCenterPRHandler,
+)
 from openhands.resolver.interfaces.forgejo import (
     ForgejoIssueHandler,
     ForgejoPRHandler,
@@ -84,6 +87,17 @@ class IssueHandlerFactory:
                     ),
                     self.llm_config,
                 )
+            elif self.platform == ProviderType.BITBUCKET_DATA_CENTER:
+                return ServiceContextPR(
+                    BitbucketDataCenterPRHandler(
+                        self.owner,
+                        self.repo,
+                        self.token,
+                        self.username,
+                        self.base_domain,
+                    ),
+                    self.llm_config,
+                )
             elif self.platform == ProviderType.AZURE_DEVOPS:
                 # Parse owner as organization/project
                 parts = self.owner.split('/')
@@ -143,6 +157,17 @@ class IssueHandlerFactory:
             elif self.platform == ProviderType.FORGEJO:
                 return ServiceContextPR(
                     ForgejoPRHandler(
+                        self.owner,
+                        self.repo,
+                        self.token,
+                        self.username,
+                        self.base_domain,
+                    ),
+                    self.llm_config,
+                )
+            elif self.platform == ProviderType.BITBUCKET_DATA_CENTER:
+                return ServiceContextPR(
+                    BitbucketDataCenterPRHandler(
                         self.owner,
                         self.repo,
                         self.token,

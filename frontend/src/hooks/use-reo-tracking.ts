@@ -15,6 +15,8 @@ const mapLoginMethodToReoType = (method: LoginMethod): ReoIdentity["type"] => {
       return "github";
     case LoginMethod.ENTERPRISE_SSO:
       return "email";
+    case LoginMethod.BITBUCKET_DATA_CENTER:
+      return "email";
     default:
       return "email";
   }
